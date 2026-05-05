@@ -1,6 +1,6 @@
 [package]
 name = "renforge"
-version = "0.1.0"
+version = "1.1.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -20,3 +20,5 @@ tauri-plugin-shell = "2.0.0"
 walkdir = "2.5"
 serde = { version = "1.0", features = ["derive"] }
 rusqlite = { version = "0.31.0", features = ["bundled"] }
+thiserror = "1.0"
+tokio = { version = "1", features = ["full"] }
