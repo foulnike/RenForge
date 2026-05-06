@@ -1,9 +1,11 @@
 [package]
 name = "renforge"
 version = "1.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "A standalone tool for modding and translating Ren'Py visual novels"
+authors = ["foulnike"]
 edition = "2021"
+repository = "https://github.com/foulnike/RenForge"
+license = "GPL-3.0"
 
 [lib]
 name = "renforge_lib"
