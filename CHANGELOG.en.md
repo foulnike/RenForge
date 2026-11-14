@@ -2,6 +2,11 @@
 
 [Русский](CHANGELOG.md) · **English**
 
+## [1.3.2]
+
+### Added
+- Automatic tag-based releases and in-app update checks.
+
 ## [1.3.1]
 
 ### Fixed

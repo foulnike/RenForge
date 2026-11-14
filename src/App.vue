@@ -18,6 +18,7 @@
     <AboutModal v-if="showAboutModal" />
     <FilesModal v-if="showFilesModal" />
     <UncoveredModal v-if="showUncoveredModal" />
+    <AppUpdateModal />
   </div>
 </template>
 
@@ -36,6 +37,8 @@ import DeliveryHooksModal from './components/DeliveryHooksModal.vue';
 import AboutModal from './components/AboutModal.vue';
 import FilesModal from './components/FilesModal.vue';
 import UncoveredModal from './components/UncoveredModal.vue';
+import AppUpdateModal from './components/AppUpdateModal.vue';
+import { checkForAppUpdate } from './updater.js';
 import Dashboard from './components/Dashboard.vue';
 import Editor from './components/Editor.vue';
 import ImageGallery from './components/ImageGallery.vue';
@@ -53,7 +56,7 @@ function handleContextMenu(e) {
   if (!isInput && !hasSelection) e.preventDefault();
 }
 
-onMounted(() => { window.addEventListener('contextmenu', handleContextMenu); });
+onMounted(() => { window.addEventListener('contextmenu', handleContextMenu); setTimeout(() => checkForAppUpdate(), 3000); });
 onUnmounted(() => { window.removeEventListener('contextmenu', handleContextMenu); });
 </script>
 

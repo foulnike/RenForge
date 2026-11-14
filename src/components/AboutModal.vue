@@ -8,7 +8,10 @@
 
       <div class="about-body">
         <div class="about-app">
-          <div class="about-app-name"><span class="logo-ren">Ren</span><span class="logo-forge">Forge</span> <span class="about-ver">v{{ APP_VERSION }}</span></div>
+          <div class="about-app-head">
+            <div class="about-app-name"><span class="logo-ren">Ren</span><span class="logo-forge">Forge</span> <span class="about-ver">v{{ APP_VERSION }}</span></div>
+            <button class="btn btn-secondary about-update-btn" @click="checkUpdates" :disabled="checking">{{ checking ? t('app_update_checking') : t('app_update_check') }}</button>
+          </div>
           <div class="about-app-sub">GPL-3.0 · © foulnike</div>
           <a class="about-link" href="https://github.com/foulnike/RenForge" target="_blank" rel="noopener">github.com/foulnike/RenForge</a>
         </div>
@@ -35,8 +38,9 @@ import { showAboutModal, showMsg } from '../store.js';
 import { t } from '../locales.js';
 import Icon from './Icon.vue';
 import appLogo from '../assets/app-logo.png';
+import { checkForAppUpdate } from '../updater.js';
 
-const APP_VERSION = '1.3.1';
+const APP_VERSION = '1.3.2';
 
 // Английская атрибуция-фолбэк (на случай, если ресурс не прочитался, напр. в dev).
 const FALLBACK = `RenForge v${APP_VERSION} — GPL-3.0 — (c) foulnike
@@ -51,6 +55,7 @@ Third-party components:
 Full license texts are in the application's licenses/ folder.`;
 
 const notices = ref(FALLBACK);
+const checking = ref(false);
 
 onMounted(async () => {
   try {
@@ -71,6 +76,18 @@ async function openFolder() {
   }
 }
 
+async function checkUpdates() {
+  checking.value = true;
+  try {
+    const update = await checkForAppUpdate({ interactive: true });
+    if (!update) showMsg('success', t('app_update_latest'), 4000);
+  } catch (e) {
+    showMsg('error', t('app_update_failed'), 6000);
+  } finally {
+    checking.value = false;
+  }
+}
+
 function close() { showAboutModal.value = false; }
 </script>
 
@@ -79,8 +96,10 @@ function close() { showAboutModal.value = false; }
 .about-logo { width: 22px; height: 22px; border-radius: 5px; vertical-align: middle; margin-right: 4px; }
 .about-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
 .about-app { display: flex; flex-direction: column; gap: 4px; }
-.about-app-name { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
-.about-ver { font-size: 13px; font-weight: 700; color: var(--accent); vertical-align: super; }
+.about-app-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; min-height: 30px; }
+.about-app-name { display: inline-flex; align-items: center; height: 30px; font-size: 22px; line-height: 30px; font-weight: 800; letter-spacing: -0.02em; }
+.about-update-btn { display: inline-flex; align-items: center; justify-content: center; height: 30px; box-sizing: border-box; padding: 0 14px; white-space: nowrap; }
+.about-ver { margin-left: 5px; font-size: 13px; line-height: 1; font-weight: 700; color: var(--accent); align-self: center; }
 .about-app-sub { font-size: 13px; color: var(--text-secondary); }
 .about-link { font-size: 13px; color: var(--accent); text-decoration: none; }
 .about-link:hover { text-decoration: underline; }

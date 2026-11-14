@@ -1,6 +1,6 @@
 [package]
 name = "renforge"
-version = "1.3.1"
+version = "1.3.2"
 description = "A standalone tool for modding and translating Ren'Py visual novels"
 authors = ["foulnike"]
 edition = "2021"
@@ -37,3 +37,7 @@ ttf-parser = "0.20"
 strsim = "0.11"
 reqwest = { version = "0.12", features = ["json"] }
 fs2 = "0.4"
+
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-process = "2.4.0"
+tauri-plugin-updater = "2.14.1"

@@ -57,8 +57,8 @@ GUI-инструмент для извлечения текста, локали�
 
 Со страницы релиза:
 
-- **`RenForge_v1.3.1_Windows_Installer.msi`** — установщик (MSI).
-- **`RenForge_v1.3.1_Portable.zip`** — Портативная версия.
+- **`RenForge_v1.3.2_Windows_Installer.msi`** — установщик (MSI).
+- **`RenForge_v1.3.2_Portable.zip`** — Портативная версия.
 
 Рантайм WebView2 встроен в установщик (работает офлайн).
 

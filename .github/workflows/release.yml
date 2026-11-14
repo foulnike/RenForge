@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate tag version
+        shell: pwsh
+        run: |
+          $config = Get-Content src-tauri/tauri.conf.json | ConvertFrom-Json
+          $tagVersion = "${{ github.ref_name }}".TrimStart('v')
+          if ($config.version -ne $tagVersion) { throw "Tag version does not match tauri.conf.json" }
+
+      - name: Build and publish Tauri release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: RenForge ${{ github.ref_name }}
+          releaseBody: |
+            Автоматический релиз RenForge.
+
+            Установщик и updater-артефакты собраны GitHub Actions.
+          releaseDraft: false
+          prerelease: false
+          uploadUpdaterJson: true
+          projectPath: .
+
+      - name: Create Portable ZIP
+        shell: pwsh
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'RenForge_Portable'
+          New-Item -ItemType Directory -Force $stage | Out-Null
+          Copy-Item src-tauri/target/release/renforge.exe $stage
+          Copy-Item src-tauri/target/release/rpyc_extractor.exe $stage
+          Copy-Item src-tauri/target/release/unrpa.exe $stage
+          Copy-Item -Recurse src-tauri/target/release/resources $stage
+          Copy-Item -Recurse src-tauri/target/release/licenses $stage
+          $zip = Join-Path $env:RUNNER_TEMP "RenForge_${env:TAG}_Portable.zip"
+          Compress-Archive -Path $stage -DestinationPath $zip -CompressionLevel Optimal
+          gh release upload $env:TAG $zip --clobber

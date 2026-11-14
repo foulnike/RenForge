@@ -2538,6 +2538,8 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init()) 
         .plugin(tauri_plugin_opener::init()) 
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             read_text_file, write_text_file, scan_project, run_unrpa, discover_source_languages,
             prepare_writable, export_translation, llm_chat_request, is_path_writable, remove_renforge_mod, cancel_export, export_strings, list_game_files,

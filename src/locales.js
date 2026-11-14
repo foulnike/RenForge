@@ -9,7 +9,7 @@ export const locales = {
     
     
       fonts: "Шрифты", 
-    settings: "Настройки", ui_accent: "Акцент", accent_custom: "Свой цвет", ui_theme: "Тема", theme_light: "Светлая", theme_dark: "Тёмная", theme_black: "Чёрная (AMOLED)",
+    settings: "Настройки", app_update_title: "Доступно обновление", app_update_available: "Доступна версия {version}.", app_update_install: "Установить", app_update_installing: "Установка…", app_update_later: "Позже", app_update_unsaved: "Сначала сохраните текущий перевод.", app_update_check: "Проверить обновления", app_update_checking: "Проверка…", app_update_latest: "Установлена последняя версия.", app_update_failed: "Не удалось проверить обновления.", ui_accent: "Акцент", accent_custom: "Свой цвет", ui_theme: "Тема", theme_light: "Светлая", theme_dark: "Тёмная", theme_black: "Чёрная (AMOLED)",
     close: "Закрыть", egg_msg: "Хватит меня тыкать!",
     ui_lang: "Интерфейс", target_lang: "Перевод на", translate_to: "Переводить на", custom_lang: "Свой вариант (ввод)...",
     custom_lang_placeholder: "Напр., korean", help_title: "Инструкция",

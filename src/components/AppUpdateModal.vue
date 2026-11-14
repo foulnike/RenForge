@@ -1,0 +1,7 @@
+<template><div v-if="showAppUpdateModal && appUpdateInfo" class="modal-overlay" @click.self="close"><div class="modal-content app-update-modal"><div class="modal-header"><h2>{{ t('app_update_title') }}</h2><button class="icon-close-btn" @click="close" :disabled="appUpdateInfo.installing"><Icon name="x" :size="18" /></button></div><div class="app-update-body"><p>{{ t('app_update_available').replace('{version}', appUpdateInfo.version) }}</p><pre v-if="appUpdateInfo.body">{{ appUpdateInfo.body }}</pre></div><div class="ai-footer"><button class="btn btn-secondary" @click="close" :disabled="appUpdateInfo.installing">{{ t('app_update_later') }}</button><button class="btn btn-primary" @click="install" :disabled="appUpdateInfo.installing">{{ appUpdateInfo.installing ? t('app_update_installing') : t('app_update_install') }}</button></div></div></div></template>
+<script setup>
+import { showAppUpdateModal, appUpdateInfo } from '../store.js'; import { installAppUpdate } from '../updater.js'; import { t } from '../locales.js'; import Icon from './Icon.vue';
+function close() { if (!appUpdateInfo.value.installing) showAppUpdateModal.value = false; }
+async function install() { try { await installAppUpdate(); } catch (e) { appUpdateInfo.value.installing = false; } }
+</script>
+<style scoped>.app-update-modal{width:520px;max-width:92vw}.app-update-body{padding:20px;color:var(--text-secondary);line-height:1.5}.app-update-body pre{max-height:220px;overflow:auto;white-space:pre-wrap;color:var(--text-main);background:var(--code-bg);padding:12px}</style>
