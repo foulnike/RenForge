@@ -233,7 +233,7 @@ import {
   showSourceModal, showFilesModal, showUncoveredModal, diagnosticBuild, targetLangCollision,
   showMsg, searchQuery, searchResults, fileNotes, showUpdateModal, showTmModal,
   scrollToBlock,
-  hiddenImages, hiddenAudio, hiddenFolders
+  hiddenImages, hiddenAudio, hiddenFolders, fileSort, sortDir
 } from '../store.js';
 import { prepareProject, buildMod, openEditor, tmFill } from '../actions.js';
 
@@ -303,8 +303,6 @@ const DEJAVU_SCRIPTS = ['latin', 'vietnamese', 'cyrillic', 'greek', 'armenian', 
 function scriptLabel(code) { return t('script_' + code); }
 
 const fileFilter = ref('all'); // all | todo | progress | done
-const fileSort = ref('name');  // name | lines | progress
-const sortDir = ref('asc');    // asc | desc
 
 const imgListRaw = ref(null);
 const audListRaw = ref(null);

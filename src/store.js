@@ -226,6 +226,9 @@ export const hiddenAudio = ref([]);
 export const hiddenFolders = ref([]); 
 export const showHidden = ref(false);
 export const showHiddenMedia = ref(false);
+// Сортировка файлов на дашборде — отдельная настройка каждого проекта.
+export const fileSort = ref('name');
+export const sortDir = ref('asc');
 export const searchQuery = ref('');
 export const searchResults = ref([]);
 
@@ -240,6 +243,11 @@ function safeParseJSON(key, defaultVal = '[]') {
   catch (e) { return JSON.parse(defaultVal); }
 }
 
+function safeEnum(key, allowed, fallback) {
+  const value = localStorage.getItem(key);
+  return allowed.includes(value) ? value : fallback;
+}
+
 export function loadProjectSettings() {
   if (!projectPath.value) return;
   hiddenFiles.value = safeParseJSON(getProjectKey('renforge_hidden'));
@@ -249,6 +257,8 @@ export function loadProjectSettings() {
   hiddenImages.value = safeParseJSON(getProjectKey('renforge_hidden_img'));
   hiddenAudio.value = safeParseJSON(getProjectKey('renforge_hidden_aud'));
   hiddenFolders.value = safeParseJSON(getProjectKey('renforge_hidden_folders'));
+  fileSort.value = safeEnum(getProjectKey('renforge_file_sort'), ['name', 'lines', 'progress'], 'name');
+  sortDir.value = safeEnum(getProjectKey('renforge_sort_dir'), ['asc', 'desc'], 'asc');
   // Языки источника/перевода — пер-проектные. Для свежего проекта остаются «не
   // указаны» (''), чтобы пользователь осознанно выбрал их перед извлечением.
   sourceLang.value = localStorage.getItem(getProjectKey('renforge_source_lang')) || '';
@@ -264,6 +274,8 @@ watch(glossary, (val) => { const k = getProjectKey('renforge_glossary'); if(k) l
 watch(hiddenImages, (val) => { const k = getProjectKey('renforge_hidden_img'); if(k) localStorage.setItem(k, JSON.stringify(val)); }, watchConfig);
 watch(hiddenAudio, (val) => { const k = getProjectKey('renforge_hidden_aud'); if(k) localStorage.setItem(k, JSON.stringify(val)); }, watchConfig);
 watch(hiddenFolders, (val) => { const k = getProjectKey('renforge_hidden_folders'); if(k) localStorage.setItem(k, JSON.stringify(val)); }, watchConfig);
+watch(fileSort, (val) => { const k = getProjectKey('renforge_file_sort'); if (k) localStorage.setItem(k, val); });
+watch(sortDir, (val) => { const k = getProjectKey('renforge_sort_dir'); if (k) localStorage.setItem(k, val); });
 // Пер-проектное сохранение языков (плюс глобальный дефолт для новых проектов)
 watch(sourceLang, (val) => { const k = getProjectKey('renforge_source_lang'); if(k) localStorage.setItem(k, val); localStorage.setItem('renforge_source_lang', val); });
 watch(targetLang, (val) => { const k = getProjectKey('renforge_target_lang'); if(k) localStorage.setItem(k, val); localStorage.setItem('renforge_target_lang', val); });
