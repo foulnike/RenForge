@@ -121,18 +121,17 @@ export const RULES = [
 ];
 
 // --- Мемоизация diagnose по содержимому блока ---
-const _cache = new Map();
-export function clearDiagnostics() { _cache.clear(); }
+// Cache by block identity so old translation states can be reclaimed by GC.
+// A global string-keyed cache was capped at 4000 entries, causing repeated
+// full-file diagnostic work on large files.
+let _cache = new WeakMap();
+export function clearDiagnostics() { _cache = new WeakMap(); }
 
 export function diagnose(block) {
   const key = block.id + '\u0000' + (block.original || '') + '\u0000' + (block.translation || '');
-  let v = _cache.get(key);
-  if (v !== undefined) return v;
-  // Предохранитель от безграничного роста кэша в долгой сессии правки (новый ключ на
-  // каждое изменение перевода). Сбрасываем при превышении порога — память важнее, чем
-  // сохранение мемо для давно неактуальных состояний.
-  if (_cache.size > 4000) _cache.clear();
-  v = [];
+  const cached = _cache.get(block);
+  if (cached && cached.key === key) return cached.value;
+  let v = [];
   for (const r of RULES) {
     const items = r.test(block) || [];
     if (!items.length) continue;
@@ -141,7 +140,7 @@ export function diagnose(block) {
     const canFix = r.fix ? (r.fix(block) != null) : false;
     v.push({ id: r.id, severity: r.severity, msgKey: r.msgKey, items, fixable: canFix, bulkFix: canFix && r.bulk });
   }
-  _cache.set(key, v);
+  _cache.set(block, { key, value: v });
   return v;
 }
 

@@ -190,20 +190,17 @@ export function flashBlock(id) {
   });
 }
 
-// Центрировать редактор на блоке id + подсветить. Перед скроллом доводим высоту ВСЕХ
-// полей перевода до финальной: ленивый авторост (IntersectionObserver) иначе растягивает
-// соседние textarea уже во время прокрутки и цель уезжает — навигация промахивается
-// (напр. строка 217 кидала в район 330). Двойной rAF: сперва применяем высоты, затем,
-// когда раскладка пересчитана, центрируем.
+// Центрировать редактор на блоке id + подсветить. Высота textarea измеряется лениво
+// только у видимых полей, поэтому переход не вызывает reflow всего большого файла.
 export function scrollToBlock(id) {
   requestAnimationFrame(() => {
-    document.querySelectorAll('.editor-panel .transparent-input').forEach((el) => {
-      el.style.height = 'auto';
-      el.style.height = el.scrollHeight + 'px';
-    });
+    const el = document.getElementById('block-' + id);
+    if (el) el.scrollIntoView({ behavior: 'instant', block: 'center' });
+    // content-visibility may materialize cards around the target on this frame;
+    // center once more after that layout pass without measuring the whole file.
     requestAnimationFrame(() => {
-      const el = document.getElementById('block-' + id);
-      if (el) el.scrollIntoView({ behavior: 'instant', block: 'center' });
+      const current = document.getElementById('block-' + id);
+      if (current) current.scrollIntoView({ behavior: 'instant', block: 'center' });
       flashBlock(id);
     });
   });

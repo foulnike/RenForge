@@ -36,7 +36,8 @@
           </div>
           <div class="sidebar-list">
             <template v-for="(block, index) in parsedBlocks" :key="'nav-' + block.id">
-              <div class="sidebar-item" 
+              <div class="sidebar-item"
+                   v-memo="[block.translation, block.confirmed, block.prev_original, getBlockStatus(block), blockVisible(block)]"
                    @click="focusBlockByIndex(index)"
                    v-show="blockVisible(block)">
                 <span class="status-dot" :class="getBlockStatus(block)"></span>
@@ -59,6 +60,7 @@
                v-for="(block, index) in parsedBlocks" 
                :key="block.id" 
                :id="'block-' + block.id" 
+                v-memo="[block.translation, block.confirmed, block.prev_original, block.channel, getBlockStatus(block), blockVisible(block), flashBlockId === block.id]"
                :class="['status-' + getBlockStatus(block), { 'row-flash': flashBlockId === block.id }]"
                v-show="blockVisible(block)">
             <div class="block-header">
@@ -262,17 +264,18 @@ function resize(el) {
 const autogrowObserver = typeof IntersectionObserver !== 'undefined'
   ? new IntersectionObserver((entries, obs) => {
       for (const e of entries) {
-        if (e.isIntersecting) { resize(e.target); obs.unobserve(e.target); }
+        if (e.isIntersecting) { visibleTextareas.add(e.target); resize(e.target); obs.unobserve(e.target); }
       }
     }, { rootMargin: '300px 0px' })
   : null;
+const visibleTextareas = new Set();
 
 const vAutogrow = {
   mounted(el) {
     if (autogrowObserver) autogrowObserver.observe(el);
-    else nextTick(() => resize(el));
+    else nextTick(() => { visibleTextareas.add(el); resize(el); });
   },
-  unmounted(el) { if (autogrowObserver) autogrowObserver.unobserve(el); },
+  unmounted(el) { visibleTextareas.delete(el); if (autogrowObserver) autogrowObserver.unobserve(el); },
 };
 
 // Мемоизация подсветки глоссария: highlightGlossary вызывался для КАЖДОГО блока на
@@ -291,7 +294,7 @@ watch(parsedBlocks, () => { hlCache.clear(); clearDiagnostics(); });
 // высоту всех видимых textarea — иначе они остаются в одну строку до фокуса.
 watch(editorResizeTick, () => {
   nextTick(() => {
-    document.querySelectorAll('.editor-panel .transparent-input').forEach(resize);
+    visibleTextareas.forEach(resize);
   });
 });
 
@@ -346,11 +349,10 @@ function nextIndex(from, untranslatedOnly) {
 function focusBlockByIndex(i) {
   if (i < 0 || i >= parsedBlocks.value.length) return;
   const b = parsedBlocks.value[i];
-  // Ленивый авторост соседних полей во время скролла смещает цель — центрирование
-  // считалось по «сжатой» раскладке и промахивалось (прыжок на другую строку, верно
-  // только со второго раза). Перед навигацией доводим высоту всех видимых textarea до
-  // финальной, чтобы оффсет цели был окончательным, и лишь затем центрируем.
-  document.querySelectorAll('.editor-panel .transparent-input').forEach(resize);
+  // Measure only the destination field before centering; measuring every field here
+  // forces a full-file reflow on large scripts.
+  const target = document.getElementById('ta-' + b.id);
+  if (target) resize(target);
   nextTick(() => {
     const el = document.getElementById('ta-' + b.id);
     if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ behavior: 'instant', block: 'center' }); }
