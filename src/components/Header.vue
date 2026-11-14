@@ -177,7 +177,7 @@
             <div class="setting-row">
                 <label>{{ t('ui_accent') }}</label>
                 <AccentPicker />
-            </div>Импорт строк из JSON
+            </div>
             <div class="setting-row">
                 <label>{{ t('ui_lang') }}</label>
                 <select class="settings-select" v-model="uiLang" @change="saveSettings">

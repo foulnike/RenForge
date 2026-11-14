@@ -466,7 +466,7 @@ export function isManualString(block) {
 export function updateManualString(block, original, translation, type) {
   if (!block) return;
   const orig = original || '';
-  if (!orig) return;
+  if (!orig.trim()) return;
   const blockType = type === 'dialogue' ? 'dialogue' : 'ui';
   block.block_type = blockType;
   block.original = orig;
@@ -740,6 +740,7 @@ export async function importManualStringsJSON() {
         let skipped = 0;
         let lastId = null;
         const toCurrent = !!currentFilePath.value && currentFilePath.value !== MANUAL_FILE;
+        const importedBlocks = [];
 
         for (const item of items) {
             if (!item || typeof item !== 'object') {
@@ -755,14 +756,33 @@ export async function importManualStringsJSON() {
 
             const translationRaw = item.translation == null ? '' : String(item.translation);
             const translation = translationRaw.trim() ? translationRaw : '';
+            const rawType = String(item.type ?? item.block_type ?? '').toLowerCase();
+            const type = rawType === 'ui' || rawType === 'interface' ? 'ui' : 'dialogue';
 
-            const id = await addManualString(original, translation, 'dialogue', toCurrent, 0);
+            const id = await addManualString(original, translation, type, toCurrent, 0);
             if (id) {
                 added++;
                 lastId = id;
+                if (toCurrent) {
+                    const block = parsedBlocks.value.find((candidate) => candidate.id === id);
+                    if (block) importedBlocks.push(block);
+                }
             } else {
                 skipped++;
             }
+        }
+
+        // The regular add dialog keeps edits dirty until the user saves. A file
+        // import is a batch operation, so persist it before reporting success.
+        if (toCurrent && importedBlocks.length > 0) {
+            await invoke('upsert_translations_batch', {
+                projectPath: projectPath.value,
+                entries: importedBlocks,
+            });
+            fileStats.value = await invoke('get_translation_stats', { projectPath: projectPath.value });
+            editorDirty.value = false;
+            loadPairs();
+            invoke('tm_contribute', { projectPath: projectPath.value }).catch(() => {});
         }
 
         showMsg('success', `Импортировано строк: ${added}. Пропущено: ${skipped}.`);
