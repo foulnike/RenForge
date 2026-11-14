@@ -2,6 +2,12 @@
 
 [Русский](CHANGELOG.md) · **English**
 
+## [1.3.1]
+
+### Fixed
+- File sorting on the dashboard now persists across navigation and restarts.
+- Manual JSON string import and editor performance on large files.
+
 ## [1.3.0]
 
 ### Added

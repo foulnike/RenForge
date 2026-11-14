@@ -10,6 +10,8 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 use tauri_plugin_shell::ShellExt;
 use walkdir::WalkDir;
 
@@ -2511,8 +2513,10 @@ fn open_in_explorer(path: String) -> Result<(), String> {
         // Keep the switch and quoted path together. Explorer treats an
         // unquoted path with spaces as separate command-line arguments and
         // falls back to the default Documents location.
+        // `arg()` re-quotes embedded quotes on Windows. Use raw_arg so the
+        // Explorer switch reaches the shell exactly as /select,"C:\\...".
         Command::new("explorer.exe")
-            .arg(format!("/select,\"{}\"", win_path.replace('"', "")))
+            .raw_arg(format!("/select,\"{}\"", win_path.replace('"', "")))
             .spawn()
             .map_err(|e| e.to_string())?;
     }
