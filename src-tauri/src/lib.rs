@@ -2508,11 +2508,11 @@ fn open_in_explorer(path: String) -> Result<(), String> {
             win_path = win_path.replace("\\\\?\\", "");
         }
 
-        // Explorer expects /select,<path> as one argument. Passing the switch
-        // and path separately is parsed inconsistently, especially in folders
-        // with many entries, so selection can be lost.
+        // Keep the switch and quoted path together. Explorer treats an
+        // unquoted path with spaces as separate command-line arguments and
+        // falls back to the default Documents location.
         Command::new("explorer.exe")
-            .arg(format!("/select,{}", win_path))
+            .arg(format!("/select,\"{}\"", win_path.replace('"', "")))
             .spawn()
             .map_err(|e| e.to_string())?;
     }
